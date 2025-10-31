@@ -13,6 +13,7 @@ class Grid {
     this.toggleImageControls();
     this.updateLabels();
     this.updateNoiseLabels();
+    this.applyOrientationStyles(this.verticalDisplay);
   }
 
   initializeState(rows, cols, buffer, options) {
@@ -22,6 +23,7 @@ class Grid {
     this.assets = options.assets || [];
     this.onSourceChange = options.onSourceChange || (() => {});
     this.onImageChange = options.onImageChange || (() => {});
+    this.verticalDisplay = options.verticalDisplay || false;
     this.currentSource =
       options.defaultSource || (this.assets.length ? "image" : "camera");
     this.currentImageName = options.defaultImage || this.assets[0] || null;
@@ -125,6 +127,8 @@ class Grid {
     this.sourceSelect = this.sourceControl.control;
     this.imageLabel = this.imageControl.label;
     this.imageSelect = this.imageControl.control;
+
+    this.orientationCheckbox = this.createOrientationToggle();
   }
 
   createSliderControl({ labelText, min, max, value, step = 1 }) {
@@ -249,6 +253,51 @@ class Grid {
     const display = this.currentSource === "image" ? "block" : "none";
     this.imageLabel.style("display", display);
     this.imageSelect.style("display", display);
+  }
+
+  createOrientationToggle() {
+    const checkbox = createCheckbox("Vertical display", this.verticalDisplay);
+    checkbox.style("display", "block");
+    checkbox.style("margin-top", "10px");
+    checkbox.changed(() => this.handleOrientationToggle());
+    this.container.child(checkbox);
+    return checkbox;
+  }
+
+  handleOrientationToggle() {
+    this.verticalDisplay = this.orientationCheckbox.checked();
+    this.applyOrientationStyles(this.verticalDisplay);
+  }
+
+  applyOrientationStyles(isVertical) {
+    if (isVertical) {
+      this.container.style("top", "20%");
+      this.container.style("left", "auto");
+      // this.container.style("right", "300px");
+      this.container.style(
+        "transform",
+        "translateY(-15%) translateX(500%) rotate(-90deg)"
+      );
+      // this.container.style("transform-origin", "top right");
+
+      this.ctrlBtn.style("top", "1%");
+      // this.ctrlBtn.style("left", "auto");
+      // this.ctrlBtn.style("right", "10px");
+      this.ctrlBtn.style("transform", "translateY(-15%) translateX(1100%) ");
+      this.ctrlBtn.style("transform-origin", "top right");
+    } else {
+      this.container.style("top", "5px");
+      this.container.style("left", "10px");
+      this.container.style("right", "auto");
+      this.container.style("transform", "none");
+      this.container.style("transform-origin", "top left");
+
+      this.ctrlBtn.style("top", "5px");
+      this.ctrlBtn.style("left", "10px");
+      this.ctrlBtn.style("right", "auto");
+      this.ctrlBtn.style("transform", "none");
+      this.ctrlBtn.style("transform-origin", "top left");
+    }
   }
 
   isBufferReady() {
